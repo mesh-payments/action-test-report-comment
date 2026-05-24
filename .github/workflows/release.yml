@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 # Single concurrency slot so two rapid merges can't race on tag creation.
 concurrency:
@@ -34,12 +34,12 @@ jobs:
       - run: npm run build
 
       # Defense-in-depth — the PR ci workflow already enforces this, but
-      # a stale dist/ landing on main would ship broken code under a
+      # a stale dist/ landing on master would ship broken code under a
       # new tag. Fail loudly here too.
       - name: Verify dist/ is up to date
         run: |
           if ! git diff --quiet -- dist; then
-            echo "::error::dist/ is out of date on main. Rebuild and re-merge."
+            echo "::error::dist/ is out of date on master. Rebuild and re-merge."
             git diff -- dist | head -100
             exit 1
           fi
