@@ -121,10 +121,6 @@ Two ways to pin:
 - **No threshold-based check failure.** This is a PR-comment formatter, not a gating check. Use a separate step (or a coverage tool's own thresholds) for that.
 - **No inline diff annotations.** Out of scope for v1.
 
-## Migrating from `marocchino/sticky-pull-request-comment`
-
-The marker format matches `marocchino/sticky-pull-request-comment`'s, so if your previous workflow used that to post a sticky with the same `header:`, this action will **update the existing comment in place** rather than posting a duplicate on the first run.
-
 ## Development
 
 ```bash
