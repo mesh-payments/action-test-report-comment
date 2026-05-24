@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+.nyc_output/
+.eslintcache
+*.log
+.DS_Store
+.idea/
+.vscode/

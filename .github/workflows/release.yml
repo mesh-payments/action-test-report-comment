@@ -1,0 +1,151 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# Single concurrency slot so two rapid merges can't race on tag creation.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the full history so `git log <last-tag>..HEAD` can walk
+          # back to the previous release, and so the major-float tag can
+          # be force-moved with a meaningful annotation.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+      # Defense-in-depth — the PR ci workflow already enforces this, but
+      # a stale dist/ landing on main would ship broken code under a
+      # new tag. Fail loudly here too.
+      - name: Verify dist/ is up to date
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::dist/ is out of date on main. Rebuild and re-merge."
+            git diff -- dist | head -100
+            exit 1
+          fi
+
+      - name: Compute next version from Conventional Commits
+        id: bump
+        run: |
+          set -euo pipefail
+
+          # Latest existing vX.Y.Z tag, or none on first run.
+          prev_tag="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1 || true)"
+          if [ -z "$prev_tag" ]; then
+            echo "No previous semver tag found; defaulting baseline to v0.0.0."
+            prev_tag="v0.0.0"
+            range="HEAD"
+          else
+            range="${prev_tag}..HEAD"
+          fi
+          echo "prev_tag=${prev_tag}"
+          echo "range=${range}"
+
+          # Strip the leading v, split into major/minor/patch.
+          IFS='.' read -r major minor patch <<< "${prev_tag#v}"
+
+          # Walk commit subjects in the range. Pick the largest bump
+          # implied by any one of them. Anything outside the recognised
+          # types is ignored (chore/docs/ci/test/style/refactor/perf
+          # without a `!` marker → no bump on its own).
+          bump=""
+          while IFS= read -r subject; do
+            [ -z "$subject" ] && continue
+            # BREAKING CHANGE footer also implies major; we check the
+            # full body for that one case.
+            if printf '%s' "$subject" | grep -Eq '^(feat|fix|chore|docs|ci|test|style|refactor|perf|build|revert)(\([^)]+\))?!:'; then
+              bump="major"
+              break
+            fi
+            type="$(printf '%s' "$subject" | sed -nE 's/^([a-z]+)(\([^)]+\))?:.*/\1/p')"
+            case "$type" in
+              feat)
+                [ "$bump" != "major" ] && bump="minor"
+                ;;
+              fix|perf|revert)
+                [ -z "$bump" ] && bump="patch"
+                ;;
+            esac
+          done < <(git log --pretty=format:'%s' "$range")
+
+          # BREAKING CHANGE footer in any commit body in the range.
+          if [ "$bump" != "major" ] \
+             && git log --pretty=format:'%B' "$range" \
+                | grep -Eq '^BREAKING CHANGE:'; then
+            bump="major"
+          fi
+
+          if [ -z "$bump" ]; then
+            echo "No release-worthy commits since ${prev_tag}. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          case "$bump" in
+            major) major=$((major+1)); minor=0; patch=0 ;;
+            minor) minor=$((minor+1)); patch=0 ;;
+            patch) patch=$((patch+1)) ;;
+          esac
+
+          new_tag="v${major}.${minor}.${patch}"
+          echo "bump=${bump}"
+          echo "new_tag=${new_tag}"
+          echo "prev_tag=${prev_tag}" >> "$GITHUB_OUTPUT"
+          echo "new_tag=${new_tag}"   >> "$GITHUB_OUTPUT"
+          echo "major_tag=v${major}"  >> "$GITHUB_OUTPUT"
+          echo "skip=false"           >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tags
+        if: steps.bump.outputs.skip != 'true'
+        env:
+          NEW_TAG:   ${{ steps.bump.outputs.new_tag }}
+          MAJOR_TAG: ${{ steps.bump.outputs.major_tag }}
+        run: |
+          set -euo pipefail
+          # The default GITHUB_TOKEN identity. Required because annotated
+          # tags carry a tagger; without these git refuses to create one.
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$NEW_TAG"   -m "$NEW_TAG"
+          # Force-move the major float so consumers pinned to @vN
+          # follow forward. Local + remote both need -f because the tag
+          # already exists from previous releases.
+          git tag -fa "$MAJOR_TAG" -m "$MAJOR_TAG → $NEW_TAG"
+
+          git push origin "$NEW_TAG"
+          git push origin -f "refs/tags/$MAJOR_TAG"
+
+      - name: Create GitHub Release
+        if: steps.bump.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_TAG:  ${{ steps.bump.outputs.new_tag }}
+          PREV_TAG: ${{ steps.bump.outputs.prev_tag }}
+        run: |
+          set -euo pipefail
+          gh release create "$NEW_TAG" \
+            --title "$NEW_TAG" \
+            --notes-start-tag "$PREV_TAG" \
+            --generate-notes \
+            --verify-tag

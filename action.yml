@@ -1,0 +1,64 @@
+name: 'Unified test results PR comment'
+description: 'Posts a sticky PR comment with coverage, suite counts, per-file weak spots, and an opt-in Playwright report link.'
+author: 'mesh-payments'
+
+inputs:
+  coverage-summary:
+    description: 'Path to a v8 `coverage-summary.json` (json-summary reporter). One of coverage-summary or coverage-report is required.'
+    required: false
+  coverage-report:
+    description: 'Path to a Jest `coverage-report.json` (the --json --coverage --testLocationInResults shape). One of coverage-summary or coverage-report is required.'
+    required: false
+  unit-junit:
+    description: 'Path to a unit-test JUnit XML. When set, the Suites table is rendered with a Unit row.'
+    required: false
+  e2e-junit:
+    description: 'Path to an E2E JUnit XML. When set, the Suites table includes an E2E row. All other e2e-* inputs are no-ops without this.'
+    required: false
+  e2e-opt-in:
+    description: 'Truthy when the repo''s E2E opt-in flag is on. Empty/unset → the E2E row is rendered as "skipped (opt-in)" regardless of what the junit contains.'
+    required: false
+    default: ''
+  e2e-feature-name:
+    description: 'Label rendered in the E2E row (e.g. `E2E (RUN_E2E)`).'
+    required: false
+    default: 'E2E'
+  e2e-skip-note:
+    description: 'Optional blockquote text rendered under the Suites table when the E2E row reads "skipped (opt-in)". Use to explain the gate (e.g. "E2E is gated on `MY_FLAG` and did not run on this PR.").'
+    required: false
+    default: ''
+  weak-threshold:
+    description: 'Lines-coverage % below which a file is reported in the weak-spots <details> block.'
+    required: false
+    default: '80'
+  weak-limit:
+    description: 'Maximum number of rows in the weak-spots table. When the cap trims rows, the summary reads "showing X of Y".'
+    required: false
+    default: '50'
+  comment-header:
+    description: 'Sticky-comment header marker. Use the same value across jobs that should write to the same comment.'
+    required: false
+    default: 'test-results'
+  playwright-footer-note:
+    description: 'Optional blockquote rendered at the end of the comment (replace mode). Use to explain the Playwright report flow (e.g. "Playwright report is only published on failure.").'
+    required: false
+    default: ''
+  playwright-report-url:
+    description: 'When set, the action runs in append mode: it appends a Playwright report footer to the existing sticky (matched by comment-header) instead of building a new comment.'
+    required: false
+  playwright-append-note:
+    description: 'Optional trailing line rendered under the appended Playwright report block (e.g. "Report includes screenshots, video, and trace viewer per failure.").'
+    required: false
+    default: ''
+  github-token:
+    description: 'GitHub token used to post the sticky comment. Defaults to GITHUB_TOKEN.'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'message-square'
+  color: 'green'

@@ -1,0 +1,30 @@
+{
+  "name": "action-test-report-comment",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub Action that posts a unified PR comment with coverage + suites + per-file weak spots, with append-mode for a downstream Playwright report link.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node --test test/*.test.js",
+    "build": "ncc build src/index.js -o dist --license licenses.txt --minify",
+    "all": "npm run lint && npm test && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mesh-payments/action-test-report-comment.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3",
+    "eslint": "^8.57.0"
+  }
+}

@@ -1,0 +1,49 @@
+{
+    "numTotalTests": 142,
+    "numPassedTests": 140,
+    "numFailedTests": 0,
+    "numPendingTests": 2,
+    "numTodoTests": 0,
+    "success": true,
+    "testResults": [],
+    "coverageMap": {
+        "/runner/work/repo/repo/src/utils/format.ts": {
+            "path": "/runner/work/repo/repo/src/utils/format.ts",
+            "statementMap": {
+                "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 10 } },
+                "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 10 } },
+                "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 10 } },
+                "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 10 } },
+                "4": { "start": { "line": 5, "column": 0 }, "end": { "line": 5, "column": 10 } }
+            },
+            "fnMap": {
+                "0": { "name": "format", "line": 1 },
+                "1": { "name": "parseLocale", "line": 3 }
+            },
+            "branchMap": {
+                "0": { "loc": { "start": { "line": 2, "column": 0 } } }
+            },
+            "s": { "0": 5, "1": 0, "2": 0, "3": 0, "4": 0 },
+            "f": { "0": 5, "1": 0 },
+            "b": { "0": [1, 0] }
+        },
+        "/runner/work/repo/repo/src/utils/parse.ts": {
+            "path": "/runner/work/repo/repo/src/utils/parse.ts",
+            "statementMap": {
+                "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 10 } },
+                "1": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 10 } },
+                "2": { "start": { "line": 3, "column": 0 }, "end": { "line": 3, "column": 10 } },
+                "3": { "start": { "line": 4, "column": 0 }, "end": { "line": 4, "column": 10 } }
+            },
+            "fnMap": {
+                "0": { "name": "parse", "line": 1 }
+            },
+            "branchMap": {
+                "0": { "loc": { "start": { "line": 2, "column": 0 } } }
+            },
+            "s": { "0": 3, "1": 3, "2": 3, "3": 3 },
+            "f": { "0": 3 },
+            "b": { "0": [3, 3] }
+        }
+    }
+}

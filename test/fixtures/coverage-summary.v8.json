@@ -1,0 +1,26 @@
+{
+    "total": {
+        "statements": { "total": 7269, "covered": 2666, "skipped": 0, "pct": 36.67 },
+        "branches": { "total": 509, "covered": 412, "skipped": 0, "pct": 80.15 },
+        "functions": { "total": 219, "covered": 110, "skipped": 0, "pct": 50.22 },
+        "lines": { "total": 7269, "covered": 2666, "skipped": 0, "pct": 36.67 }
+    },
+    "/runner/work/repo/repo/src/utils/format.ts": {
+        "statements": { "total": 50, "covered": 10, "skipped": 0, "pct": 20.00 },
+        "branches": { "total": 8, "covered": 2, "skipped": 0, "pct": 25.00 },
+        "functions": { "total": 6, "covered": 2, "skipped": 0, "pct": 33.33 },
+        "lines": { "total": 50, "covered": 10, "skipped": 0, "pct": 20.00 }
+    },
+    "/runner/work/repo/repo/src/utils/parse.ts": {
+        "statements": { "total": 40, "covered": 35, "skipped": 0, "pct": 87.50 },
+        "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100.00 },
+        "functions": { "total": 5, "covered": 5, "skipped": 0, "pct": 100.00 },
+        "lines": { "total": 40, "covered": 35, "skipped": 0, "pct": 87.50 }
+    },
+    "/runner/work/repo/repo/src/components/Card.tsx": {
+        "statements": { "total": 80, "covered": 40, "skipped": 0, "pct": 50.00 },
+        "branches": { "total": 10, "covered": 5, "skipped": 0, "pct": 50.00 },
+        "functions": { "total": 8, "covered": 4, "skipped": 0, "pct": 50.00 },
+        "lines": { "total": 80, "covered": 40, "skipped": 0, "pct": 50.00 }
+    }
+}
