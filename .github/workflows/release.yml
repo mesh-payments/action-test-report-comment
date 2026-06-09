@@ -16,15 +16,16 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Need the full history so `git log <last-tag>..HEAD` can walk
           # back to the previous release, and so the major-float tag can
           # be force-moved with a meaningful annotation.
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
+          package-manager-cache: false
           node-version: 20
           cache: npm
 
