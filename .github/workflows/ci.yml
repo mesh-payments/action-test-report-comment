@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: [dev-arm-small]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -16,6 +16,10 @@ jobs:
           package-manager-cache: false
           node-version: 20
           cache: npm
+
+      - name: CodeArtifact login
+        if: vars.CODEARTIFACT_NPM_DISABLED != 'true'
+        uses: mesh-payments/gh-workflows/.github/actions/codeartifact-npm-login@v1
 
       - run: npm ci
 
