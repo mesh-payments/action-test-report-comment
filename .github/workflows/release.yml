@@ -87,7 +87,13 @@ jobs:
                 [ -z "$bump" ] && bump="patch"
                 ;;
             esac
-          done < <(git log --pretty=format:'%s' "$range")
+          # tformat, not format: `format` omits the newline after the LAST
+          # subject, and `read` returns non-zero on an unterminated line, so
+          # the loop body never runs for it. The oldest commit in the range
+          # is last, which is the only conventional-commit subject a
+          # single-commit PR merged with a merge commit has, so such a PR
+          # always computed no bump and skipped its release.
+          done < <(git log --pretty=tformat:'%s' "$range")
 
           # BREAKING CHANGE footer in any commit body in the range.
           if [ "$bump" != "major" ] \
