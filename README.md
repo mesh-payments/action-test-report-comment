@@ -1,6 +1,6 @@
 # action-test-report-comment
 
-Sticky PR comment with a unified test report: coverage table, suite counts, per-file weak spots, and an optional Playwright report link appended from a downstream job.
+Sticky PR comment with a unified test report: coverage table, suite counts, an opt-in per-file weak-spots list, and an optional Playwright report link appended from a downstream job.
 
 Renders both Jest's `coverage-report.json` (`--json --coverage --testLocationInResults`) and Vitest's v8 `coverage-summary.json` natively.
 
@@ -18,7 +18,7 @@ Coverage only — no junit, no Playwright:
     coverage-report: ./coverage-report.json
 ```
 
-Posts a single sticky comment with a Coverage table and a per-file weak-spots `<details>` block. No Suites table, no Playwright footer.
+Posts a single sticky comment with a Coverage table. No per-file weak-spots block (opt in with `weak-files`), no Suites table, no Playwright footer.
 
 ## Full example
 
@@ -92,8 +92,9 @@ At least one of `coverage-summary` or `coverage-report` is required. In append m
 | `e2e-opt-in` | no | `''` | Truthy when the repo's E2E opt-in flag is on. Empty/unset → E2E row reads `_skipped (opt-in)_`. |
 | `e2e-feature-name` | no | `E2E` | Label rendered in the E2E row (e.g. `E2E (RUN_E2E)`). |
 | `e2e-skip-note` | no | `''` | Blockquote rendered under the Suites table when the E2E row is "skipped (opt-in)". |
-| `weak-threshold` | no | `80` | Lines-coverage % below which a file appears in the weak-spots `<details>` block. |
-| `weak-limit` | no | `50` | Cap on rows in the weak-spots table. When exceeded, summary reads `showing X of Y`. |
+| `weak-files` | no | `false` | Render the per-file weak-spots `<details>` block. **Off by default** — the list is sorted worst-first, so publishing it on every PR reads as a ranked worklist of files to add tests to rather than as a report. |
+| `weak-threshold` | no | `80` | Lines-coverage % below which a file appears in the weak-spots `<details>` block. No effect unless `weak-files` is on. |
+| `weak-limit` | no | `50` | Cap on rows in the weak-spots table. When exceeded, summary reads `showing X of Y`. No effect unless `weak-files` is on. |
 | `comment-header` | no | `test-results` | Sticky-comment marker. Use the same value across jobs that should share a comment. |
 | `playwright-report-url` | no | — | When set, the action runs in **append mode**: appends a Playwright report block to the existing sticky. |
 | `playwright-footer-note` | no | `''` | Optional blockquote at the end of the comment (replace mode only). |
@@ -130,13 +131,14 @@ npm run lint
 npm run build    # ncc → dist/index.js (committed)
 ```
 
-Tests cover seven cases:
+Tests cover:
 
 - Coverage-only Jest call (no Suites, no Playwright footer).
 - Single-suite Unit-only.
 - Full Vitest + E2E + Playwright.
 - Missing-junit fallback.
 - Weak-files cap with `showing X of Y`.
+- Weak-files off by default, and rendered when opted in.
 - Opt-in-off → E2E row reads `_skipped (opt-in)_`.
 - Append-mode body for the Playwright report.
 

@@ -3,7 +3,11 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
 
-const { buildComment, buildPlaywrightAppend } = require('../src/build-comment');
+const {
+    buildComment,
+    buildPlaywrightAppend,
+    weakFilesSection
+} = require('../src/build-comment');
 const { loadCoverage } = require('../src/parse-coverage');
 const { parseJunitFile } = require('../src/parse-junit');
 const { makeManyWeakFiles } = require('./helpers/make-many-weak-files');
@@ -16,7 +20,7 @@ function read(name) {
 }
 
 // ---------- 1. Coverage-only Jest call ----------
-test('coverage-only Jest call: Coverage + weak-files, no Suites, no footer', () => {
+test('coverage-only Jest call: Coverage only, no Suites, no footer', () => {
     const coverage = loadCoverage({
         coverageReportPath: fx('coverage-report.jest.json')
     });
@@ -93,6 +97,7 @@ test('weak-files cap at 50 produces "showing 50 of N" summary', () => {
         coverage,
         hasUnitJunitInput: false,
         hasE2EJunitInput: false,
+        weakFiles: true,
         repoRoot: REPO_ROOT
     });
     assert.match(
@@ -139,6 +144,52 @@ test('append-mode body renders the Playwright report block', () => {
         note: 'Report includes screenshots, video, and trace viewer per failure.'
     });
     assert.equal(body, read('append-playwright.md'));
+});
+
+// ---------- 8. weak-files flag, both directions ----------
+test('weak-files off (default): the per-file block is absent', () => {
+    const coverage = loadCoverage({
+        coverageReportPath: fx('coverage-report.jest.json')
+    });
+    // Prove the fixture actually has files under the threshold first, so
+    // the absence asserted below is caused by the flag and not by there
+    // being nothing to render.
+    const rendered = weakFilesSection({
+        perFile: coverage.perFile,
+        repoRoot: REPO_ROOT,
+        threshold: 80,
+        limit: 50
+    });
+    assert.match(rendered, /file\(s\) below 80% line coverage/);
+
+    const body = buildComment({
+        coverage,
+        hasUnitJunitInput: false,
+        hasE2EJunitInput: false,
+        repoRoot: REPO_ROOT
+    });
+    assert.equal(body.includes('<details>'), false);
+    assert.equal(body.includes('line coverage'), false);
+    // The overall Coverage table stays.
+    assert.match(body, /#### Coverage/);
+    assert.match(body, /\| Lines \|/);
+});
+
+test('weak-files on: the per-file block is rendered', () => {
+    const coverage = loadCoverage({
+        coverageReportPath: fx('coverage-report.jest.json')
+    });
+    const body = buildComment({
+        coverage,
+        hasUnitJunitInput: false,
+        hasE2EJunitInput: false,
+        weakFiles: true,
+        repoRoot: REPO_ROOT
+    });
+    assert.match(
+        body,
+        /<summary>\d+ file\(s\) below 80% line coverage<\/summary>/
+    );
 });
 
 // ---------- Custom e2e feature name ----------
