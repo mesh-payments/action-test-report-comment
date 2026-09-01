@@ -27,8 +27,15 @@ inputs:
     description: 'Optional blockquote text rendered under the Suites table when the E2E row reads "skipped (opt-in)". Use to explain the gate (e.g. "E2E is gated on `MY_FLAG` and did not run on this PR.").'
     required: false
     default: ''
+  weak-files:
+    description: >-
+      Render the per-file weak-spots <details> block. Off by default: the list
+      is sorted worst-first, which makes it read as a worklist of files to add
+      tests to, rather than as a report. Set to a truthy value to opt in.
+    required: false
+    default: 'false'
   weak-threshold:
-    description: 'Lines-coverage % below which a file is reported in the weak-spots <details> block.'
+    description: 'Lines-coverage % below which a file is reported in the weak-spots <details> block. Only applies when weak-files is on.'
     required: false
     default: '80'
   weak-limit:

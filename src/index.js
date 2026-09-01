@@ -44,6 +44,7 @@ async function run() {
         const e2eFeatureName =
             getOptionalInput('e2e-feature-name') || 'E2E';
         const e2eSkipNote = getOptionalInput('e2e-skip-note');
+        const weakFiles = isTruthy(getOptionalInput('weak-files'));
         const weakThreshold = getIntInput('weak-threshold', 80);
         const weakLimit = getIntInput('weak-limit', 50);
         const header = getOptionalInput('comment-header') || 'test-results';
@@ -142,6 +143,7 @@ async function run() {
             e2eFeatureName,
             e2eOptIn,
             e2eSkipNote,
+            weakFiles,
             weakThreshold,
             weakLimit,
             repoRoot: process.env.GITHUB_WORKSPACE || process.cwd(),

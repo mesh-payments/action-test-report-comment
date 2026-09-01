@@ -140,6 +140,7 @@ function buildComment({
     e2eFeatureName = 'E2E',
     e2eOptIn = false,
     e2eSkipNote = '',
+    weakFiles = false,
     weakThreshold = 80,
     weakLimit = 50,
     repoRoot,
@@ -176,13 +177,19 @@ function buildComment({
             '#### Coverage',
             coverageTable(coverage.total)
         );
-        const weak = weakFilesSection({
-            perFile: coverage.perFile,
-            repoRoot,
-            threshold: weakThreshold,
-            limit: weakLimit
-        });
-        if (weak) parts.push('', weak);
+        // Off by default. The block is sorted worst-first, so publishing it
+        // on every PR reads as a ranked worklist of files to add tests to,
+        // which is satisfied as well by a test asserting a rendered string as
+        // by one testing a flow. Opt in with the weak-files input.
+        if (weakFiles) {
+            const weak = weakFilesSection({
+                perFile: coverage.perFile,
+                repoRoot,
+                threshold: weakThreshold,
+                limit: weakLimit
+            });
+            if (weak) parts.push('', weak);
+        }
     } else {
         parts.push('#### Coverage', '_no coverage data_');
     }
